@@ -26,6 +26,17 @@ class PokerGame(models.Model):
         ),
     )
 
+    stage = models.CharField(
+        max_lengh=1,
+        help_text="the current stage of the game. For exameple: F means flop has been dealt with.",
+        choices=(('I', 'pre pocket cards'), ('P', "pocket"), ('F', 'flop'), ('T', 'turn'), ('R', 'river'))
+    )
+
+    bets = models.CharField(
+        max_lengh=1000, blank=True,
+        help_text=("place holder once we feel comfortable with introducing bets")
+    )
+
 class User(models.Model):
     """
     # Records the meta data for a user(name, chips etc) and the current game the user is in, if any.
