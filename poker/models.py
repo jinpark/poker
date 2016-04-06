@@ -1,7 +1,7 @@
-from django.db import models
 import uuid
+from django.db import models
 
-class PokerGame(models.Model):
+class Game(models.Model):
     """
     # Records the CURRENT status of a poker game
     """
@@ -11,18 +11,26 @@ class PokerGame(models.Model):
             "Unique, externally-friendly identifier for a specific poker game"
         ),
     )
-
-    cards_dealt = models.CharField(
-        max_length=50, blank=True,
+    pocket_cards = models.CharField(
+        max_length=40, blank=True,
         help_text=(
-            "Keep records of the cards the game have dealt with, "
+            "Keep records of the pocket cards the game have dealt with, "
             "so the next card generated from the game will never be one of them:) "
             "we will assume there will be 10 players at most in a game. "
-            "so the maximum of cards will be 10*2+5 =25. "
-            "the community cards will be represented first, with "|" as the separator followed with "
-            "cards dealt for each player"            
-            "for example: h2dtca|<guid_1>h3h4&<guid_2>d3d4&<guid_3>c3c4 "
-            "represents a game of 3 players with a flop of heart of 2, diamond of 10 and club of Ace "          
+            "so the maximum of cards will be 10*2 =20. "
+            "'|' will be used as the separator"
+            "for example: <guid_1>$h3h4|<guid_2>$d3d4|<guid_3>$c3c4 "
+            "represents a game of 3 players"
+        ),
+    )
+    community_cards = models.CharField(
+        max_length=10, blank=True,
+        help_text=(
+            "Keep records of the community cards the game have dealt with"
+            "so the next card generated from the game will never be one of them:) "
+            "so the maximum of cards will be 5. "
+            "for example: h3d4c6s7 "
+            "represents the current status of a game in stage of `turn`"
         ),
     )
 

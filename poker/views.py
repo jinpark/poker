@@ -1,4 +1,5 @@
 from django.http import HttpResponseServerError
+from django.shortcuts import render_to_response
 
 def game_status(request):
     """
