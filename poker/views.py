@@ -1,7 +1,74 @@
 from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response
-from poker.models import Game, User
-from __builtin__ import None
+from poker.models import FrenchDeck, Game, GameStages, User
+
+def start(request):
+    """
+    Responsible for serving the pocket cards for the given user
+    Since each user will have it's own pocket cards,
+        this view requires a game guid as well as a user guid
+    """
+    game_guid = request.POST.get("game_guid", None)
+    user_guid = request.POST.get("user_guid", None)
+    if not game_guid or user_guid:
+        return HttpResponseServerError()
+    game = None
+    user = None
+    try:
+        game = Game.objects.get(guid=game_guid)
+        user = User.objects.get(guid=user_guid)
+    except:
+        return HttpResponseServerError()
+    # get two pocket cards for the user
+    # TODO: if re-call, return the same card
+    # TODO: return in template
+    return FrenchDeck.next_random_cards(2, exclude_cards=game.community_cards.append(game.pocket_cards))
+
+def next(request):
+    """
+    Responsible for serving the next community card(s) for a particular game.
+        depending on the current stage of the game.
+    # TODO: make sure this won't be kept called,
+        if re-called, same cards would be served, by fetching from game.community_cards.
+    """
+    game_guid = request.POST.get("game_guid", None)
+    game = None
+    try:
+        game = Game.objects.get(guid=game_guid)
+    except:
+        return HttpResponseServerError()
+    next_cards = FrenchDeck.next_random_cards(game.number_of_cards_needed())
+    return render_to_response(
+        "some_template.html",
+        {
+            next_cards="|".join(next_cards)
+        },
+        context_instance=RequestContext(request)
+    )
+
+def action(request):
+    """
+    Responsible for react to an action from a particular user
+        from a particular game
+    For example: 1. check. 2. fold. 3. call. 4. re-raise
+    """
+    # TODO: 1. need to update the game
+    # TODO: the game need to check that all the users has entered the same state(same money or fold)
+    #    before the game could be entered into the next state.
+    game_guid = request.POST.get("game_guid", None)
+    game = None
+    try:
+        game = Game.objects.get(guid=game_guid)
+    except:
+        return HttpResponseServerError()
+    return render_to_response(
+        "some_template.html",
+        {
+            next_cards=_next_cards(game)
+            # TODO: change game stage.
+        },
+        context_instance=RequestContext(request)
+    )
 
 def game_status(request):
     """
@@ -33,64 +100,7 @@ def game_status(request):
         {
             community_cards=game.community_cards,
             pocket_cards=pocket_cards,
+            # TODO: basically return game obj :)
         },
         context_instance=RequestContext(request)
     )
-
-def next(request):
-    """
-    dealt the next card(s) for a particular game
-    """
-    game_guid = request.POST.get("game_guid", None)
-    game = None
-    try:
-        game = Game.objects.get(guid=game_guid)
-    except:
-        return HttpResponseServerError()
-    return render_to_response(
-        "some_template.html",
-        {
-            next_cards=_next_cards(game)
-        },
-        context_instance=RequestContext(request)
-    )
-
-FULL_DECK = [
-    "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "dT", "dJ", "dQ", "dK", "dA",
-    "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "cT", "cJ", "cQ", "cK", "cA",
-    "h2", "h3", "h4", "h5", "h6", "h7", "h8", "h9", "hT", "hJ", "hQ", "hK", "hA",
-    "s2", "s3", "d4", "s5", "s6", "s7", "s8", "s9", "sT", "sJ", "sQ", "sK", "sA",
-]
-
-def _random_card():
-    """
-    returns the random card from a FULL deck, the validity of the result will be checked in the caller
-    """
-    return random.choice(FULL_DECK)
-
-def _next_cards(game):
-    """
-    responsible for dealing with the next card(s) depending on the stage of the game.
-    special case would be the pre-flop, which would expect 3 cards to be served.
-    """
-    next_cards = []
-    if game.stage = "pre-flop" # deal 3 cards
-        for x in range(0, 3):
-            # refresh the obj to make sure it's up to date
-            game = Game.objects.get(guid=game.guid)
-            while true:
-                potential_card = _random_card()
-                if potential_card not in game.community_cards and potential_card not in game.pocket_cards:
-                    next_cards.append(potential_card)
-                    game.community_card = game.community_card + "&potential_card"
-                    game.save()
-                    break;
-    else:
-        while True:
-            potential_card = _random_card()
-            if potential_card not in game.community_cards and potential_card not in game.pocket_cards:
-                next_cards.append(potential_card)
-                game.community_card = game.community_card + "&potential_card"
-                game.save()
-                break;
-    return next_cards
