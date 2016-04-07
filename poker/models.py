@@ -35,13 +35,13 @@ class Game(models.Model):
     )
 
     stage = models.CharField(
-        max_lengh=1,
+        max_length=1,
         help_text="the current stage of the game. For exameple: F means flop has been dealt with.",
         choices=(('I', 'pre pocket cards'), ('P', "pocket"), ('F', 'flop'), ('T', 'turn'), ('R', 'river'))
     )
 
     bets = models.CharField(
-        max_lengh=1000, blank=True,
+        max_length=1000, blank=True,
         help_text=("place holder once we feel comfortable with introducing bets")
     )
 

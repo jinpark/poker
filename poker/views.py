@@ -1,7 +1,6 @@
 from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response
 from poker.models import Game, User
-from __builtin__ import None
 
 def game_status(request):
     """
@@ -31,8 +30,8 @@ def game_status(request):
     return render_to_response(
         "some_template.html",
         {
-            community_cards=game.community_cards,
-            pocket_cards=pocket_cards,
+            "community_cards": game.community_cards,
+            "pocket_cards": pocket_cards,
         },
         context_instance=RequestContext(request)
     )
@@ -50,7 +49,7 @@ def next(request):
     return render_to_response(
         "some_template.html",
         {
-            next_cards=_next_cards(game)
+            "next_cards":_next_cards(game)
         },
         context_instance=RequestContext(request)
     )
@@ -74,7 +73,7 @@ def _next_cards(game):
     special case would be the pre-flop, which would expect 3 cards to be served.
     """
     next_cards = []
-    if game.stage = "pre-flop" # deal 3 cards
+    if game.stage == "pre-flop": # deal 3 cards
         for x in range(0, 3):
             # refresh the obj to make sure it's up to date
             game = Game.objects.get(guid=game.guid)
