@@ -1,6 +1,8 @@
 import uuid
 import random
 from django.db import models
+from django.db.models import signals
+from channels import Group
 
 class FrenchDeck:
     """
@@ -145,6 +147,15 @@ class Game(models.Model):
         ):
             return 1
         return 0
+
+def send_status(sender, instance, created, **kwargs):
+    print "sent to " + "table-{}".format(instance.guid) 
+    Group("table-{}".format(instance.guid)).send({"text": instance.guid})
+
+
+signals.post_save.connect(send_status, sender=Game)
+
+
 
 class User(models.Model):
     """
