@@ -51,14 +51,6 @@ def game_status(request):
         game = Game.objects.get(guid=game_guid)
     except:
         return HttpResponseServerError()
-    next_cards = FrenchDeck.next_random_cards(game.number_of_cards_needed())
-    return render_to_response(
-        "some_template.html",
-        {
-            "next_cards":"|".join(next_cards)
-        },
-        context_instance=RequestContext(request)
-    )
 
     # here is where the game serving cards
     game = game.move_to_next_stage_if_ready()
